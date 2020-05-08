@@ -1,0 +1,18 @@
+{
+  "name": "edit",
+  "version": "1.0.0",
+  "description": "Text editor",
+  "main": "bin/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "edit": "./bin/index.js"
+  },
+  "author": "Agustin Martinez",
+  "license": "ISC",
+  "dependencies": {
+    "line-reader": "^0.4.0",
+    "minimist": "^1.2.5"
+  }
+}
