@@ -1,25 +1,15 @@
 #!/usr/bin/env node
-const funciones = require('./utils/funciones.js')
+const path = require('path');
+const funciones = require('./utils/funciones.js');
 const minimist = require('minimist');
 //const lineReader = require('line-reader');
 const fs = require("fs");
-const path = require('path');
 
 let filePath=path.normalize(process.cwd());
-var options = {
-    n:false,
-    e:false,
-    i:false,
-    f:false
-};
 
-var subs = {
-    n:[],
-    e:[],
-    i:[],
-    f:[],
-    cm:[]
-}
+var options = {  n:false, e:false, i:false, f:false  };
+
+var subs = { n:[], e:[], i:[],  f:[],  cm:[] }
 
 const args = minimist(process.argv.slice(2));
 const num_arg = args._.length;
@@ -34,9 +24,8 @@ if (options.n!==false){
 arrayAux=funciones.setData(args.e);
 options.e=arrayAux[0];
 if (options.e!==false){
-    if (arrayAux[1].length>1){
+    if (Array.isArray(arrayAux[1])){
         subs.e=funciones.formatSubst(arrayAux[1]);
-        //subs.concat(funciones.formatSubst(arrayAux[1]));
     }else {
         subs.e=[funciones.formatSubst(arrayAux[1])];
     }
@@ -48,9 +37,10 @@ if (options.i!==false){
         subs.i = [funciones.formatSubst(arrayAux[1])];
 }
 
-// bobtenemos f
+// obtenemos f
 arrayAux=funciones.setData(args.f);
 options.f=arrayAux[0];
+
 
 if (num_arg===1 && ( options.n===true || options.e===true || options.i===true || options.f===true) ){
     fileName=args._[0];
@@ -61,6 +51,11 @@ if (num_arg===1 && ( options.n===true || options.e===true || options.i===true ||
     throw new Error('No se introdujo comando de substitución valido \n '+'Formato: edithor OPTIONS [SUBSTITUTION COMMAND] [INPUTFILE]')
 }
 
+//console.log(((options.e)+(false)));
+if( ((options.n)+(options.i)+(options.f))> 1 && ((options.e)+(false))===0 ){
+    throw new Error('El comando es incorrecto')
+}
+
 const fileAddress=funciones.getFileAddress(process.cwd(),fileName);
 
 var letsgo=false;
@@ -69,8 +64,9 @@ else {
     throw new Error('El archivo con el nombre '+ fileName+' no ha sido encontrado en el directorio '+filePath)
 }
 
+
 var arrayF=[];
-if (options.f!==false){
+if (options.f!==false){   // si opcion -f es solicitada
     var scriptFile=funciones.getFileAddress(process.cwd(),arrayAux[1]);
     if (!fs.existsSync(scriptFile)) {
         throw new Error('No se encontró el script correspondiente a: '+scriptFile)
@@ -91,10 +87,10 @@ if (options.f!==false){
             funciones.runEditorByOne(fileAddress,subs,options);
         }
     });
-}else {
+}else {  // si no es solicitada f
     if (letsgo===true && num_arg===1){
         funciones.runEditor(fileAddress,subs,options);
-    }else if(letsgo===true && num_arg===2) {
+    }else if(letsgo===true && num_arg===2) {  // si no se ha definido ninguna opcion
         funciones.runEditorByOne(fileAddress,subs,options);
     }
 }

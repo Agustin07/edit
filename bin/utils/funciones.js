@@ -1,10 +1,6 @@
 const path = require('path');
 const fs = require("fs");
 
-function getvaluofW() {
-    return 'WWW'
-}
-
 function setData(input) {
     if (typeof input !== 'undefined') {
         if (input===true){ // ha sido llamada una opcion.
@@ -29,7 +25,7 @@ function formatear(cadena) {  // formato de comandos esperado: 's/regexp/var_sub
     let config=cadena.split('/');
     if (config[0]==='s'){  //Valida el comando de substitucion.
         if (config.length!==4 ){
-            throw new Error('Comando no valido')
+            throw new Error('Comando "'+cadena+'" no valido')
         }
         else {
             if (config[3]==='g' || config[3]==='' || config[3].match('^w.*$') || config[3]==='p' || config[3]==='I'){
@@ -48,7 +44,7 @@ function formatear(cadena) {  // formato de comandos esperado: 's/regexp/var_sub
             }
         }
     }else {
-        throw new Error('Comando de substitución no valido');
+        throw new Error('Comando de substitución "'+cadena+'" no valido');
     }
 }
 
@@ -65,7 +61,7 @@ function formatSubst(comando) {
         }
 
     }
-    return false;
+    return null;
 }
 
 function getFileAddress(dirname,fileName){
@@ -77,16 +73,19 @@ function runEditor(fileAddress, subs,options) {
     var lineReader = require('readline').createInterface({
         input: require('fs').createReadStream(fileAddress)
     });
-
     var bitacora=[].concat(subs.cm,subs.n,subs.e,subs.i,subs.f);
     var writeForW=[];
     var iupdate='';
+
+    bitacora=bitacora.filter(n => n);
+    //console.log(bitacora.filter(n => n));
+
     for (var i = 0, len = bitacora.length; i < len; i++) {
         if(bitacora[i][2]=='w'){
             writeForW[i]=fs.createWriteStream(bitacora[i][3]+'.txt');
         }
-
     }
+
 
     lineReader.on('line', function (line) {
         for (var i = 0, len = bitacora.length; i < len; i++) {
@@ -127,36 +126,22 @@ function runEditorByOne(fileAddress, subs,options) {
 
     if(bitacora[2]=='w'){
         writeForW=fs.createWriteStream(bitacora[3]+'.txt');
-
     }
 
     lineReader.on('line', function (line) {
             if (bitacora[0].test(line)){
                 line=line.replace(bitacora[0],bitacora[1]);
-                if (bitacora[2]==='p'){
-                    console.log(line);
-                }
-                if (bitacora[2]==='w'){
-                    writeForW.write(line + '\n');
-                }
+                if (bitacora[2]==='p'){   console.log(line);   }
+                if (bitacora[2]==='w'){   writeForW.write(line + '\n');  }
             }
-            if (options.i===true){
-                iupdate+=line+'\n';
-            }
-        if (options.n===false){ console.log(line)}
+            // if (options.i===true){ iupdate+=line+'\n'; }
+        if (options.n===false){ console.log(line) }
     });
-
-    lineReader.on('close', function (line) {
-        if(options.i===true){
-            var fileUpdate=fs.createWriteStream(fileAddress);
-            fileUpdate.write(iupdate);
-        }
-    });
-
+    /* lineReader.on('close', function (line) {
+        if(options.i===true){ var fileUpdate=fs.createWriteStream(fileAddress); fileUpdate.write(iupdate); }
+    }); */
 }
 
-
-exports.getvaluofW = getvaluofW;
 exports.setData = setData;
 exports.formatSubst =formatSubst;
 exports.formatear =formatear;
